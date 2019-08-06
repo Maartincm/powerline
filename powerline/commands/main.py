@@ -164,6 +164,20 @@ def get_argparser(ArgumentParser=argparse.ArgumentParser):
 		     '`--socket ADDRESS\': no `=\' or short form allowed '
 		     '(in other powerline clients, not here).'
 	)
+	parser.add_argument(
+		'--inner-side', nargs='?', choices=('left', 'right'),
+		help='When side starts with `above`, '
+		     'allow specifying the inner side. '
+		     'If not set, both sides will be returned. '
+		     'Ignored when side does not start with `above`'
+	)
+	parser.add_argument(
+		'--lnumber', type=int,
+		help='When side starts with `above`, '
+		     'allow specifying the line number to return. '
+		     'If not set, all lines will be returned. '
+		     'Ignored when side does not start with `above`'
+	)
 	return parser
 
 
@@ -172,7 +186,9 @@ def write_output(args, powerline, segment_info, write):
 		segment_info.update(args.renderer_arg)
 	if args.side.startswith('above'):
 		for line in powerline.render_above_lines(
+			side=args.inner_side,
 			width=args.width,
+			lnumber=args.lnumber,
 			segment_info=segment_info,
 			mode=segment_info.get('mode', None),
 		):
@@ -180,7 +196,7 @@ def write_output(args, powerline, segment_info, write):
 				write(line + '\n')
 		args.side = args.side[len('above'):]
 
-	if args.side:
+	if args.side and '-' not in args.side:
 		rendered = powerline.render(
 			width=args.width,
 			side=args.side,

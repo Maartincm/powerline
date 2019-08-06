@@ -248,8 +248,16 @@ class Renderer(object):
 		'''
 
 		theme = self.get_theme(kwargs.get('matcher_info', None))
-		for line in range(theme.get_line_number() - 1, 0, -1):
-			yield self.render(side=None, line=line, **kwargs)
+		lnumber = kwargs.pop('lnumber')
+		if lnumber:
+			for line in [lnumber]:
+				try:
+					yield self.render(line=line, **kwargs)
+				except IndexError:
+					yield ''
+		else:
+			for line in range(theme.get_line_number() - 1, 0, -1):
+				yield self.render(line=line, **kwargs)
 
 	def render(self, mode=None, width=None, side=None, line=0, output_raw=False, output_width=False, segment_info=None, matcher_info=None):
 		'''Render all segments.
